@@ -16,6 +16,25 @@ code {
     monospace;
 }
 
+.rotate-enter {
+  transform: rotate(0);
+}
+
+.rotate-enter-active {
+  transform: rotate(360deg);
+  transition: transform 1s;
+}
+
+.rotate-exit {
+  transform: rotate(360deg);
+}
+
+.rotate-exit-active {
+  transform: rotate(0);
+  transition: transform 1s;
+}
+
+
 
   .main-country-container {
     margin-top: 7rem;

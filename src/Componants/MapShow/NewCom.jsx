@@ -3,15 +3,36 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import axios from 'axios';
 import 'leaflet/dist/leaflet.css';
 import style from '../../index.css'
-
+import L from 'leaflet';
 const CountryMap = () => {
   const [selectedCountry, setSelectedCountry] = useState("");
-  const [searchedCountry, setSearchedCountry] = useState("india");
-    const [countryname, setCountryname] = useState("india");
+  const [searchedCountry, setSearchedCountry] = useState("");
+    const [countryname, setCountryname] = useState("");
     const [mapCenter, setMapCenter] = useState([ 22.3511148, 78.6677428]);
    
   const mapRef = useRef(null);
   const [zoom, setzoom] = useState(6)
+
+  useEffect(() => {
+    const map = mapRef.current;
+    console.log(map)
+    if (map) {
+      map.on('click', handleMapClick);
+    }
+  
+    return () => {
+      if (map) {
+        map.off('click', handleMapClick);
+      }
+    };
+  }, []);
+
+  const customIcon = L.icon({
+    iconUrl: 'path/to/icon.png',
+    iconSize: [40, 40], // Adjust the width and height as needed
+  });
+
+
 // handleclick function will take care for geting more details about the specific country 
 // here pass argument "country " the whic contains country name 
   const handleCountryClick = async (country) => {
@@ -32,6 +53,7 @@ const CountryMap = () => {
 // when a user select the place on map the it will gives me lat and lng value 
   const handleMapClick = async (event) => {
     const { lat, lng } = event.latlng;
+    console.log(lat,lng)
     setMapCenter([lat, lng])
     try {
       const response = await axios.get(`https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lng}&key=1ae388d8d9ae44f58cd16026e478ea96`);
@@ -44,17 +66,10 @@ const CountryMap = () => {
     }
   };
 
-  useEffect(() => {
-    // this map acctuly play the vital role for selecting the place on the map 
-    const map = mapRef.current;
-    console.log(map)
-    if (map) {
-      map.on('click', handleMapClick);
-    }
+  // this map acctuly play the vital role for selecting the place on the map 
 
-    
-  },[]);
-
+  
+  
   return (
     <div className='main-country-container'>
 {/* for input box contianer */}
@@ -95,18 +110,19 @@ const CountryMap = () => {
                 )
             }
         </div>
-   
+        {/* position={selectedCountry.latlng}  */}
                 {/* map imeage  */}
         <div className='map-contaier-map'>
             <MapContainer ref={mapRef} center={[mapCenter[0], mapCenter[1]]} zoom={zoom} maxBounds={[[-90, -180], [90, 180]]} style={{ height: '300px', width: '63vw' }}>
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                 {selectedCountry && (
-                <Marker position={selectedCountry.latlng}>
+                <Marker position={[mapCenter[0], mapCenter[1]]} icon={customIcon}>
                     <Popup>
                     <h2>{selectedCountry.name.common}</h2>
-                    <img width="100px" height="60px" src={selectedCountry.flags.svg} alt={`${selectedCountry.name.common} flag`} />
-                    <p>Population: {selectedCountry.population}</p>
-                                        </Popup>
+                    <img width="100px" height="60px" src={selectedCountry.flags[0]} alt={`${selectedCountry.name.common} flag`} />
+                    
+                   
+                      </Popup>
                     </Marker>
                     )}
                 </MapContainer>
